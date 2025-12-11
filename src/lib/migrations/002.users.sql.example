@@ -1,0 +1,10 @@
+-- Example migration for users table
+-- To use this, rename to 002.users.sql and run your migration
+
+CREATE TABLE IF NOT EXISTS users (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL UNIQUE,
+	avatar TEXT,
+	created_at TIMESTAMP DEFAULT NOW()
+);

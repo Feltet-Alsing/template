@@ -116,51 +116,113 @@ docker compose exec postgres psql -U postgres -d sveltekit_db
 
 ### Using Remote Functions (Recommended)
 
-This template uses SvelteKit's experimental [remote functions](https://svelte.dev/docs/kit/remote-functions) for type-safe server communication. Example CRUD operations are provided in [src/lib/snippets.remote.ts](src/lib/snippets.remote.ts).
+This template uses SvelteKit's experimental [remote functions](https://svelte.dev/docs/kit/remote-functions) for type-safe server communication with a **generic CRUD factory pattern** that makes it easy to add new database entities.
 
-**Query data:**
+#### Architecture
+
+- **`src/lib/db/crud-factory.ts`** - Generic CRUD factory (rarely needs editing)
+- **`src/lib/db/registry.ts`** - Central registry of all entities
+- **`src/lib/snippets.remote.ts`** - Example entity implementation
+- **`src/lib/db/entities/`** - Place for additional entities
+
+#### Quick Usage (Registry Pattern)
+
 ```svelte
 <script>
-	import { getAllSnippets, getSnippet } from '$lib/snippets.remote';
+	import { db } from '$lib/db/registry';
 </script>
 
-<!-- Using await (requires experimental.async) -->
+<!-- Get all records -->
+<ul>
+	{#each await db.snippets.getAll() as snippet}
+		<li>{snippet.title}</li>
+	{/each}
+</ul>
+
+<!-- Get single record -->
+{#await db.snippets.getById(1) as snippet}
+	<h1>{snippet.title}</h1>
+	<pre>{snippet.content}</pre>
+{/await}
+
+<!-- Create with form -->
+<form {...db.snippets.create}>
+	<input {...db.snippets.create.fields.title.as('text')} placeholder="Title" />
+	<textarea {...db.snippets.create.fields.content.as('text')}></textarea>
+	<button>Create</button>
+</form>
+
+<!-- Delete with command -->
+<button onclick={() => db.snippets.delete(snippetId)}>Delete</button>
+```
+
+#### Individual Imports (Alternative)
+
+```svelte
+<script>
+	import { getAllSnippets, getSnippet, createSnippet } from '$lib/snippets.remote';
+</script>
+
 <ul>
 	{#each await getAllSnippets() as snippet}
 		<li>{snippet.title}</li>
 	{/each}
 </ul>
-
-<!-- Get single snippet -->
-{#await getSnippet(1) as snippet}
-	<h1>{snippet.title}</h1>
-	<pre>{snippet.content}</pre>
-{/await}
 ```
 
-**Create with forms:**
+#### Adding a New Entity
+
+1. **Create the migration** in `src/lib/migrations/`:
+```sql
+-- 002.users.sql
+CREATE TABLE IF NOT EXISTS users (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL UNIQUE,
+	created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+2. **Create the entity file** (e.g., `src/lib/db/entities/users.remote.ts`):
+```typescript
+import { z } from 'zod';
+import { createCrud } from '$lib/db/crud-factory';
+
+const userSchema = z.object({
+	name: z.string().min(1),
+	email: z.string().email()
+});
+
+export const users = createCrud({
+	table: 'users',
+	schema: userSchema,
+	fields: ['name', 'email']
+});
+```
+
+3. **Register in `src/lib/db/registry.ts`**:
+```typescript
+import { snippets } from '$lib/snippets.remote';
+import { users } from '$lib/db/entities/users.remote';
+
+export const db = {
+	snippets,
+	users  // Add here
+};
+```
+
+4. **Run migrations** and start using:
 ```svelte
 <script>
-	import { createSnippet } from '$lib/snippets.remote';
+	import { db } from '$lib/db/registry';
 </script>
 
-<form {...createSnippet}>
-	<input {...createSnippet.fields.title.as('text')} placeholder="Title" />
-	<textarea {...createSnippet.fields.content.as('text')}></textarea>
-	<button>Create</button>
-</form>
+{#each await db.users.getAll() as user}
+	<p>{user.name} - {user.email}</p>
+{/each}
 ```
 
-**Delete with commands:**
-```svelte
-<script>
-	import { deleteSnippet } from '$lib/snippets.remote';
-</script>
-
-<button onclick={() => deleteSnippet(snippetId)}>
-	Delete
-</button>
-```
+That's it! The CRUD factory automatically provides: `getAll()`, `getById()`, `create()`, `update()`, and `delete()`.
 
 ### Direct SQL Queries
 

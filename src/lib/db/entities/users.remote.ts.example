@@ -1,0 +1,30 @@
+/**
+ * Example Entity: Users
+ * 
+ * This is an example of how to add a new entity to the database.
+ * To use this example:
+ * 1. Create a migration file: src/lib/migrations/002.users.sql
+ * 2. Uncomment this file
+ * 3. Import and add to src/lib/db/registry.ts
+ * 4. Run migrations
+ */
+
+import { z } from 'zod';
+import { createCrud } from '$lib/db/crud-factory';
+
+// Define the schema for validation
+const userSchema = z.object({
+	name: z.string().min(1, 'Name is required'),
+	email: z.string().email('Invalid email address'),
+	avatar: z.string().url().optional()
+});
+
+// Create CRUD operations
+export const users = createCrud({
+	table: 'users',
+	schema: userSchema,
+	fields: ['name', 'email', 'avatar']
+});
+
+// You can also export individual operations if needed
+export const { getAll: getAllUsers, getById: getUserById, create: createUser } = users;
