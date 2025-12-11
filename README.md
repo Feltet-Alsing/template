@@ -84,6 +84,24 @@ docker compose up -d
 - **User**: `postgres` (configurable in `.env`)
 - **Password**: `postgres` (configurable in `.env`)
 
+### Database Setup
+
+This template includes:
+- **postgres** - Fast PostgreSQL client for Node.js
+- Database connection in [src/lib/db.ts](src/lib/db.ts)
+- Migration system with example table
+- `yarn migrate` command to run migrations
+
+### Running Migrations
+
+```sh
+# Start PostgreSQL
+docker compose up postgres -d
+
+# Run migrations
+yarn migrate
+```
+
 ### Connect to Database
 
 ```sh
@@ -92,6 +110,15 @@ psql postgresql://postgres:postgres@localhost:5432/sveltekit_db
 
 # Using Docker
 docker compose exec postgres psql -U postgres -d sveltekit_db
+```
+
+### Using the Database in Your App
+
+```typescript
+import sql from '$lib/db';
+
+// Query example
+const snippets = await sql`SELECT * FROM codeSnippets`;
 ```
 
 ## Environment Variables
@@ -120,6 +147,7 @@ yarn check        # Type-check
 yarn lint         # Run linter
 yarn format       # Format code
 yarn setup        # Initialize new project
+yarn migrate      # Run database migrations
 ```
 
 ## Docker Commands
