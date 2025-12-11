@@ -37,6 +37,7 @@
 		"vite-node": "^5.2.0"
 	},
 	"dependencies": {
-		"postgres": "^3.4.7"
+		"postgres": "^3.4.7",
+		"zod": "^4.1.13"
 	}
 }

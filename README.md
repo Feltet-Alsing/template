@@ -88,8 +88,10 @@ docker compose up -d
 
 This template includes:
 - **postgres** - Fast PostgreSQL client for Node.js
+- **Zod** - Schema validation for remote functions
 - Database connection in [src/lib/db.ts](src/lib/db.ts)
 - Migration system with example table
+- **Remote Functions** - Type-safe client-server communication (experimental)
 - `yarn migrate` command to run migrations
 
 ### Running Migrations
@@ -112,7 +114,57 @@ psql postgresql://postgres:postgres@localhost:5432/sveltekit_db
 docker compose exec postgres psql -U postgres -d sveltekit_db
 ```
 
-### Using the Database in Your App
+### Using Remote Functions (Recommended)
+
+This template uses SvelteKit's experimental [remote functions](https://svelte.dev/docs/kit/remote-functions) for type-safe server communication. Example CRUD operations are provided in [src/lib/snippets.remote.ts](src/lib/snippets.remote.ts).
+
+**Query data:**
+```svelte
+<script>
+	import { getAllSnippets, getSnippet } from '$lib/snippets.remote';
+</script>
+
+<!-- Using await (requires experimental.async) -->
+<ul>
+	{#each await getAllSnippets() as snippet}
+		<li>{snippet.title}</li>
+	{/each}
+</ul>
+
+<!-- Get single snippet -->
+{#await getSnippet(1) as snippet}
+	<h1>{snippet.title}</h1>
+	<pre>{snippet.content}</pre>
+{/await}
+```
+
+**Create with forms:**
+```svelte
+<script>
+	import { createSnippet } from '$lib/snippets.remote';
+</script>
+
+<form {...createSnippet}>
+	<input {...createSnippet.fields.title.as('text')} placeholder="Title" />
+	<textarea {...createSnippet.fields.content.as('text')}></textarea>
+	<button>Create</button>
+</form>
+```
+
+**Delete with commands:**
+```svelte
+<script>
+	import { deleteSnippet } from '$lib/snippets.remote';
+</script>
+
+<button onclick={() => deleteSnippet(snippetId)}>
+	Delete
+</button>
+```
+
+### Direct SQL Queries
+
+You can also use direct SQL queries:
 
 ```typescript
 import sql from '$lib/db';
