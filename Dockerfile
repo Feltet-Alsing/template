@@ -30,6 +30,13 @@ RUN corepack enable
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src/lib/db.ts ./src/lib/
+COPY --from=builder /app/src/lib/migrate.ts ./src/lib/
+COPY --from=builder /app/src/lib/migrations ./src/lib/migrations
+COPY --from=builder /app/docker-entrypoint.sh ./
+
+# Make entrypoint executable
+RUN chmod +x docker-entrypoint.sh
 
 # Expose port
 EXPOSE 3000
@@ -37,5 +44,5 @@ EXPOSE 3000
 # Set environment
 ENV NODE_ENV=production
 
-# Start the app
-CMD ["node", "build"]
+# Start the app with migrations
+ENTRYPOINT ["./docker-entrypoint.sh"]
