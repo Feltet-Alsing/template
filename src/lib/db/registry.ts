@@ -15,30 +15,30 @@
  */
 
 import {
-	getAllSnippets,
-	getSnippet,
-	createSnippet,
-	updateSnippet,
-	deleteSnippet
+    getAllSnippets,
+    getSnippet,
+    createSnippet,
+    updateSnippet,
+    deleteSnippet
 } from './entities.remote';
 
 export const db = {
-	snippets: {
-		getAll: getAllSnippets,
-		getById: getSnippet,
-		create: createSnippet,
-		update: updateSnippet,
-		delete: deleteSnippet
-	}
-	// Add more entities here as you add them to entities.config.ts
-	// Follow this pattern:
-	// yourEntity: {
-	//     getAll: getAllYourEntities,
-	//     getById: getYourEntity,
-	//     create: createYourEntity,
-	//     update: updateYourEntity,
-	//     delete: deleteYourEntity
-	// }
+    snippets: {
+        getAll: getAllSnippets,
+        getById: getSnippet,
+        create: createSnippet,
+        update: updateSnippet,
+        delete: deleteSnippet
+    }
+    // Add more entities here as you add them to entities.config.ts
+    // Follow this pattern:
+    // yourEntity: {
+    //     getAll: getAllYourEntities,
+    //     getById: getYourEntity,
+    //     create: createYourEntity,
+    //     update: updateYourEntity,
+    //     delete: deleteYourEntity
+    // }
 };
 
 // Type-safe access to all entities

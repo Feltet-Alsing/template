@@ -18,23 +18,23 @@ import { z } from 'zod';
  */
 
 export const entities = {
-	snippets: {
-		table: 'codeSnippets',
-		schema: z.object({
-			title: z.string().min(1, 'Title is required'),
-			content: z.string().min(1, 'Content is required')
-		}),
-		fields: ['title', 'content']
-	}
-	// Add more entities here...
-	// users: {
-	//     table: 'users',
-	//     schema: z.object({
-	//         name: z.string().min(1),
-	//         email: z.string().email()
-	//     }),
-	//     fields: ['name', 'email']
-	// }
+    snippets: {
+        table: 'codeSnippets',
+        schema: z.object({
+            title: z.string().min(1, 'Title is required'),
+            content: z.string().min(1, 'Content is required')
+        }),
+        fields: ['title', 'content']
+    }
+    // Add more entities here...
+    // users: {
+    //     table: 'users',
+    //     schema: z.object({
+    //         name: z.string().min(1),
+    //         email: z.string().email()
+    //     }),
+    //     fields: ['name', 'email']
+    // }
 };
 
 export type EntityName = keyof typeof entities;
