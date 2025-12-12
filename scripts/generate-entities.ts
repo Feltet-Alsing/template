@@ -1,7 +1,8 @@
-import { writeFile, readdir, mkdir } from 'fs/promises';
+import { writeFile, readdir, mkdir, unlink } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { z, ZodObject } from 'zod';
+import { spawn } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -223,6 +224,22 @@ async function generateMigrations() {
         // Directory might already exist
     }
 
+    // Clean slate: Delete all existing migration files
+    try {
+        const existingFiles = await readdir(migrationsDir);
+        const sqlFiles = existingFiles.filter(file => file.endsWith('.sql'));
+
+        for (const file of sqlFiles) {
+            await unlink(join(migrationsDir, file));
+        }
+
+        if (sqlFiles.length > 0) {
+            console.log(`✓ Cleaned ${sqlFiles.length} old migration file(s)`);
+        }
+    } catch (err) {
+        // No files to clean
+    }
+
     const entityNames = Object.keys(entities) as Array<keyof typeof entities>;
     let migrationIndex = 1;
 
@@ -259,6 +276,29 @@ async function generateMigrations() {
     }
 }
 
+function runMigrate(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        console.log('\n🚀 Running migrations...\n');
+
+        const migrate = spawn('yarn', ['migrate'], {
+            stdio: 'inherit',
+            shell: true
+        });
+
+        migrate.on('close', (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`Migration failed with code ${code}`));
+            }
+        });
+
+        migrate.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
+
 async function generate() {
     try {
         console.log('Generating entity files from config...\n');
@@ -273,6 +313,11 @@ async function generate() {
         (Object.keys(entities) as Array<keyof typeof entities>).forEach((name) => {
             console.log(`  - ${name}`);
         });
+
+        // Auto-run migrations
+        await runMigrate();
+
+        console.log('\n✅ Generation and migration complete!');
     } catch (error) {
         console.error('Generation failed:', error);
         process.exit(1);

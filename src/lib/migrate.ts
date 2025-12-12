@@ -28,14 +28,6 @@ async function migrate() {
 		await sql.unsafe(migration_001_notes_sql);
 		console.log('✓ Migration 001.notes.sql completed');
 
-		// 001.products.sql
-		const migration_001_products_sql = await readFile(
-			join(__dirname, 'migrations', '001.products.sql'),
-			'utf-8'
-		);
-		await sql.unsafe(migration_001_products_sql);
-		console.log('✓ Migration 001.products.sql completed');
-
 		await sql.end();
 		console.log('\n✓ All migrations completed');
 	} catch (error) {
