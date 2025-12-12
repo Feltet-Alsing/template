@@ -20,15 +20,16 @@ export interface CrudOperations<T> {
 export function createCrud<T extends ZodType>(config: CrudConfig<T>) {
     const { table, schema, fields } = config;
 
+    // Use coerce to automatically convert strings to numbers (for URL params)
+    const idSchema = z.coerce.number();
+
     // Create schema with id for updates
     const updateSchema = z.object({
-        id: z.number(),
+        id: z.coerce.number(),
         ...(Object.fromEntries(
             fields.map((field) => [field, z.any().optional()])
         ) as Record<string, z.ZodOptional<z.ZodAny>>)
     });
-
-    const idSchema = z.number();
 
     // QUERY - Get all records
     const getAll = query(async () => {
