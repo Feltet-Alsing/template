@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"setup": "./setup.sh",
-		"migrate": "vite-node src/lib/migrate.ts"
+		"migrate": "vite-node src/lib/migrate.ts",
+		"generate-entities": "vite-node scripts/generate-entities.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",

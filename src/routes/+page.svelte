@@ -2,21 +2,33 @@
 	import { db } from '$lib/db/registry';
 </script>
 
-{#each await db.snippets.getAll() as snippet}
+<h1>Products</h1>
+
+{#each await db.products.getAll() as product}
 	<div>
-		<p>{snippet.title}</p>
+		<strong>{product.name}</strong> - ${product.price}
+		{#if product.description}
+			<p>{product.description}</p>
+		{/if}
 	</div>
 {/each}
 
-<form {...db.snippets.create}>
+<h2>Add Product</h2>
+<form {...db.products.create}>
 	<label>
-		<p>Title</p>
-		<input name="title" />
-	</label>
-	<label>
-		<p>Content</p>
-		<input name="content" />
+		<p>Name</p>
+		<input name="name" required />
 	</label>
 
-	<button type="submit">Submit</button>
+	<label>
+		<p>Price</p>
+		<input name="price" required />
+	</label>
+
+	<label>
+		<p>Description</p>
+		<textarea name="description"></textarea>
+	</label>
+
+	<button type="submit">Add Product</button>
 </form>
